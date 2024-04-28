@@ -1,10 +1,11 @@
+import socket
 import time
-import requests
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # 定义 Redis Sentinel 的地址和端口
 sentinel_host = 'redis-sentinel.redis-i2.svc.cluster.local'
 sentinel_port = 26379
+
 
 # 定义请求处理类，继承自 BaseHTTPRequestHandler
 class RequestHandler(BaseHTTPRequestHandler):
@@ -27,9 +28,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 # 定义检查 Redis Sentinel 函数
 def check_redis_sentinel():
     try:
-        # 发送 HTTP 请求检查 Redis Sentinel 是否可用
-        response = requests.get(f'http://{sentinel_host}:{sentinel_port}')
-        return response.status_code == 200
+        # 创建 socket 连接到 Redis Sentinel
+        with socket.create_connection((sentinel_host, sentinel_port), timeout=5) as sock:
+            return True
     except Exception as e:
         print(f'Error checking Redis Sentinel: {str(e)}')
         return False
@@ -50,4 +51,3 @@ def main():
 # 如果当前脚本为主程序，则执行 main 函数
 if __name__ == '__main__':
     main()
-

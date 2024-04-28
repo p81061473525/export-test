@@ -8,8 +8,8 @@ spec:
     app: redis
   ports:
     - name: metrics
-      port: 59121
-      targetPort: 59121
+      port: 51921
+      targetPort: 51921
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,17 +20,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: redis-exporter
+      app: redis
   template:
     metadata:
       labels:
-        app: redis-exporter
+        app: redis
     spec:
       containers:
       - name: redis-exporter
-        image: oliver006/redis_exporter:v1.29.0
-        args:
-        - "--redis.addr=redis-i2.redis.svc.cluster.local:6379"
+        image: localhost/myself-redis-exporter:0.0.2
         ports:
-        - containerPort: 59121
+        - containerPort: 51921
 
