@@ -1,0 +1,10 @@
+{"port": 6379, "mode": "standalone", "applicant": "John Doe", "department": "Engineering", "host": "redis-master.redis-i1.svc.cluster.local", "service": "redis-i1"}
+{"port": 6379, "mode": "sentinel", "applicant": "Jane Smith", "department": "Marketing", "host": "redis.redis-i2.svc.cluster.local", "service": "redis-i2"}
+{"port": 6379, "mode": "standalone", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis-master.redis-i3.svc.cluster.local", "service": "redis-i3"}
+{"port": 6379, "mode": "sentinel", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i4.svc.cluster.local", "service": "redis-i4"}
+{"port": 6379, "mode": "sentinel", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i5.svc.cluster.local", "service": "redis-i5"}
+{"port": 6379, "mode": "stanalone", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i6.svc.cluster.local", "service": "redis-i6"}
+{"port": 6379, "mode": "stanalone", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i7.svc.cluster.local", "service": "redis-i7"}
+{"port": 6379, "mode": "sentinel", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i8.svc.cluster.local", "service": "redis-i8"}
+{"port": 6379, "mode": "stanalone", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i9.svc.cluster.local", "service": "redis-i9"}
+{"port": 6379, "mode": "sentinel", "applicant": "Alex Johnson", "department": "Quality Assurance", "host": "redis.redis-i10.svc.cluster.local", "service": "redis-i10"}

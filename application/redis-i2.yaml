@@ -1,0 +1,5 @@
+---
+- port: 6379
+  mode: sentinel
+  applicant: Jane Smith
+  department: Marketing

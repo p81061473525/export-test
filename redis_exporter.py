@@ -1,53 +1,67 @@
+import ast
+import socketserver
+import http.server
 import socket
 import time
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
-# 定义 Redis Sentinel 的地址和端口
-sentinel_host = 'redis-sentinel.redis-i2.svc.cluster.local'
-sentinel_port = 26379
+def load_redis_instances_from_file(filename):
+    redis_instances = []
+    with open(filename, 'r') as file:
+        for line in file:
+            entry = ast.literal_eval(line.strip())
+            redis_instances.append(entry)
+    return redis_instances
 
+# 由於 REDIS_INSTANCES 需要函式 load_redis_instances_from_file 先存在，變數只好放這邊，不放頭
+REDIS_INSTANCES = load_redis_instances_from_file('total.txt')
 
-# 定义请求处理类，继承自 BaseHTTPRequestHandler
-class RequestHandler(BaseHTTPRequestHandler):
-    # 处理 GET 请求
-    def do_GET(self):
-        # 设置响应状态码为 200 OK
-        self.send_response(200)
-        # 设置响应头
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        
-        # 检查 Redis Sentinel
-        if check_redis_sentinel():
-            # 如果 Redis Sentinel 存在，返回 OK
-            self.wfile.write(b'exporter_status{service="redis"} 1\n')
-        else:
-            # 如果 Redis Sentinel 不存在，返回 NOT OK
-            self.wfile.write(b'exporter_status{service="redis"} 0\n')
-
-# 定义检查 Redis Sentinel 函数
-def check_redis_sentinel():
+def check_redis_instance(host, port):
     try:
-        # 创建 socket 连接到 Redis Sentinel
-        with socket.create_connection((sentinel_host, sentinel_port), timeout=5) as sock:
+        # Create a socket connection to the Redis instance
+        with socket.create_connection((host, port), timeout=2) as conn:
+            # Connection successful, return True
             return True
     except Exception as e:
-        print(f'Error checking Redis Sentinel: {str(e)}')
+        # Connection failed, return False
         return False
 
-# 定义主程序
-def main():
-    try:
-        # 创建 HTTP 服务器，并指定请求处理类为上面定义的 RequestHandler
-        server = HTTPServer(('0.0.0.0', 51921), RequestHandler)
-        print('Starting exporter server on port 51921...')
-        # 启动 HTTP 服务器，持续监听请求
-        server.serve_forever()
-    except KeyboardInterrupt:
-        # 捕获 Ctrl+C 中断信号，关闭服务器
-        print('Stopping exporter server...')
-        server.socket.close()
+def generate_prometheus_metrics(instance, available):
+    service_name = instance["service"]
+    if available:
+        return f'redis_alive{{service="{service_name}"}} 1'
+    else:
+        return f'redis_alive{{service="{service_name}"}} 0'
 
-# 如果当前脚本为主程序，则执行 main 函数
-if __name__ == '__main__':
+def check_redis_status():
+    result = ""
+    # Iterate through each Redis instance and check its availability
+    for instance in REDIS_INSTANCES:
+        host = instance["host"]
+        port = instance["port"]
+        if check_redis_instance(host, port):
+            metrics = generate_prometheus_metrics(instance, True)
+            result += metrics + "\n"
+        else:
+            metrics = generate_prometheus_metrics(instance, False)
+            result += metrics + "\n"
+    return result.encode()
+
+class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/metrics':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(check_redis_status())
+        else:
+            super().do_GET()
+
+def main():
+    PORT = 51921
+    server_address = ('', PORT)
+    httpd = socketserver.TCPServer(server_address, MyHttpRequestHandler)
+    print(f"Starting HTTP server on port {PORT}")
+    httpd.serve_forever()
+
+if __name__ == "__main__":
     main()

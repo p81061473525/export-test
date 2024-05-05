@@ -5,7 +5,7 @@ FROM python:3
 WORKDIR /app
 
 # 複製 Python 腳本到容器中的 /app 目錄
-COPY redis_exporter.py .
+COPY . .
 
 # 安裝依賴的 Python 模組
 RUN pip install prometheus_client requests
